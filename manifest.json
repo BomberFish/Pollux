@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Pollux",
+  "version": "1.0.0",
+  "description": "Interact with Gemini Nano in a sidebar, running locally.",
+  "minimum_chrome_version": "137",
+  "icons": {
+    "256": "res/gemini.png"
+  },
+  "side_panel": {
+    "default_path": "src/sidebar.html"
+  },
+  "background": {
+      "service_worker": "src/sw.js"
+  },
+  "permissions": ["sidePanel"]
+}

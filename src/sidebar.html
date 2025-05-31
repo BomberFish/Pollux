@@ -1,0 +1,44 @@
+<html>
+    <head>
+        <script src="../lib/dreamland.js"></script>
+        <style>
+            body,html {
+                padding: 0;
+                margin: 0;
+                overflow: hidden;
+                color-scheme: light dark;
+            }
+
+            body,html,input,button {
+                font-family: system-ui, -apple-system, BlinkSystemMacFont, Arial, Helvetica, sans-serif;
+            }
+
+            @media (prefers-color-scheme: light) {
+                :root {
+                    --bg: #fafaff;
+                    --fill-primary: #f0f0f5;
+                    --fg: #060608;
+                    --fg-secondary: #424246;
+
+                    --accent: #186bf2;
+                    --error: #d32f2f;
+                }
+            }
+
+            @media (prefers-color-scheme: dark) {
+                :root {
+                    --bg: #101012;
+                    --fill-primary: #1a1a1e;
+                    --fg: #ffffff;
+                    --fg-secondary: #8a8a8c;
+
+                    --accent: #4285f4;
+                    --error: #f44336;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <script defer src="./ui.js"></script>
+    </body>
+</html>
