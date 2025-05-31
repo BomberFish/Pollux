@@ -4,7 +4,7 @@ A Chrome extension to interact with a local Gemini Nano model in a side panel.
 
 ## Requirements
 
-- Chrome 137 or higher (?, Prompt API docs state 137 Beta specifically)
+- Chrome 138 or higher
 
 ## TODO
 - Keep track of token usage
