@@ -26,7 +26,7 @@ function App() {
         { type: "info", message: "Model ready!" }
       ];
       this.sendDisabled = false;
-    } catch {
+    } catch(error) {
       this.messages = [...this.messages, { type: "error", message: "Failed to load model: " + error }];
       console.error(error);
     }
