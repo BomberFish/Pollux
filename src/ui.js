@@ -23,12 +23,16 @@ function App() {
             resolve();
             return;
           }
-          this.pageContent = distill(response.content || "");
-          this.tabTitle = response.title || "";
-          this.tabUrl = response.url || "";
-          console.log("Page content:", this.pageContent);
-          console.log("Tab title:", this.tabTitle);
-          console.log("Tab URL:", this.tabUrl);
+          try {
+            this.pageContent = distill(response.content || "", new URL(response.url || "").host);
+            this.tabTitle = response.title || "";
+            this.tabUrl = response.url || "";
+            console.log("Page content:", this.pageContent);
+            console.log("Tab title:", this.tabTitle);
+            console.log("Tab URL:", this.tabUrl);
+          } catch {
+            console.warn("womp womp");
+          }
           resolve();
         });
       });
@@ -47,7 +51,7 @@ function App() {
           {
             role: "system",
             content:
-              `You are a helpful browser assistant designed to answer questions about the current page or general knowledge. The user is looking at a website with the title ${this.tabTitle} and the URL ${this.tabUrl}. Here is an excerpt of the site's content: ${this.pageContent.slice(0, 500)}...`
+              `You are a helpful browser assistant designed to answer questions about the current page or general knowledge. The user is looking at a website with the title ${this.tabTitle} and the URL ${this.tabUrl}. Here is the first 500 words of the site's content: ${this.pageContent.split(" ").slice(0, 500).join(" ")}...`
           },
         ];
       }
@@ -289,8 +293,8 @@ function App() {
   `;
 }
 
-// slopped-out function shat out by gemini 2.5 pro
-function distill(html) {
+// shitty vibecoded function
+function distill(html, host) {
   const doc = new DOMParser().parseFromString(html, "text/html");
 
   // 1. Remove unwanted elements globally.
@@ -313,40 +317,60 @@ function distill(html) {
     '[class*="social"]', '[id*="social"]', // Social media links/widgets
     '[class*="sidebar"]', '[id*="sidebar"]',// Explicit sidebars
     '[class*="comment"]', '[id*="comment"]', // Comment sections and forms
-    '[class*="advert"]', '[id*="advert"]', // Advertisements
-    '[class*="ad"]', '[id*="ad"]', '[class*="ads"]', // More ad selectors
-    '[class*="related"]', // Related posts/articles links
-    '[class*="promo"]', '[id*="promo"]',   // Promotional content
-    '[class*="widget"]', // Generic widgets, often in sidebars or footers
     '[aria-hidden="true"]', // Elements explicitly hidden from assistive technologies (and often users)
     'figure > figcaption', // Captions for figures (figures themselves often contain images, which are removed)
     '.noprint', '[class*="noprint"]' // Elements not meant for printing (often ads or navigation)
   ];
   doc.querySelectorAll(selectorsToRemove.join(', ')).forEach(el => el.remove());
 
+  let hostSpecificElement;
+
+  switch (host) {
+    case (host.endsWith("wikipedia.org")):
+      hostSpecificElement = doc.body.querySelector("#bodyContent")  // Wikipedia's main content area
+      break;
+  }
+
   // 2. Attempt to find the main content element.
   // This is a heuristic and prioritizes common semantic tags and class names for articles.
-  let mainContentElement =
-    doc.querySelector('article') ||    // HTML5 article tag
-    doc.querySelector('main') ||       // HTML5 main tag
-    doc.querySelector('[role="main"]') || // ARIA role for main content
-    // Common class names for main content wrappers
-    doc.querySelector('.entry-content') ||
-    doc.querySelector('.post-content') ||
-    doc.querySelector('.article-body') ||
-    doc.querySelector('.story-content') ||
-    doc.querySelector('div[class*="article-content"]') || // More generic article content class
-    // More generic class names, use with caution as they can be broad
-    doc.querySelector('div[class*="content"]') ||
-    doc.querySelector('div[class*="post"]') ||
-    doc.querySelector('div[class*="main"]') || // Can be too broad if not specific enough
-    // ID-based selectors, often used for main content areas
-    doc.querySelector('div[id*="content"]') ||
-    doc.querySelector('div[id*="main"]') ||
-    doc.body; // Fallback to the entire body if no specific content area is found
+  let mainContentElement = hostSpecificElement; // Start with host-specific element
+
+  if (!mainContentElement) {
+    const selectors = [
+      'article',    // HTML5 article tag
+      'main',       // HTML5 main tag
+      '[role="main"]', // ARIA role for main content
+      // Common class names for main content wrappers
+      '.entry-content',
+      '.post-content',
+      '.article-body',
+      '.story-content',
+      'div[class*="article-content"]', // More generic article content class
+      // More generic class names, use with caution as they can be broad
+      'div[class*="content"]',
+      'div[class*="post"]',
+      'div[class*="main"]', // Can be too broad if not specific enough
+      // ID-based selectors, often used for main content areas
+      'div[id*="content"]',
+      'div[id*="main"]'
+    ];
+
+    for (const selector of selectors) {
+      mainContentElement = doc.querySelector(selector);
+      if (mainContentElement) {
+        break; // Found an element, stop searching
+      }
+    }
+  }
+
+  // Fallback to the entire body if no specific content area is found
+  if (!mainContentElement) {
+    mainContentElement = doc.body;
+  }
 
   if (!mainContentElement) {
     // This path should ideally not be taken if doc.body exists.
+    console.error("no content");
     return "";
   }
 
