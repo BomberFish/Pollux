@@ -133,12 +133,11 @@ function App() {
     }
 
     .messages {
-      height: calc(100vh - 6.4em);
+      height: calc(100vh - 8em);
       overflow-y: auto;
     }
 
     .input {
-      height: 5em;
       display: flex;
       flex-direction: column;
       gap: 0.5em;
@@ -152,8 +151,22 @@ function App() {
 
     .page-info {
       color: var(--fg-secondary);
-      font-size: 0.9em;
-      span {
+      font-size: 0.975em;
+      margin-bottom: 0.5em;
+
+      div {
+        display: flex;
+        align-items: center;
+        gap: 0.5em;
+      }
+
+      div > span > svg {
+        fill: var(--fg-secondary);
+        width: 1.5em;
+        height: 1.5em;
+      }
+
+      div > span:not(:has(svg)) {
         display: inline-block;
         overflow: hidden;
         white-space: nowrap;
@@ -227,9 +240,15 @@ function App() {
       <div class="input">
         <div class="page-info">${use(this.pageContent, (content) => {
             if (content && content.length > 0) {
-                return html`<span>Looking at <strong>${use(this.tabTitle)}</strong></span>`;
+                return html`<div>
+                    <span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="M160-80q-33 0-56.5-23.5T80-160v-360q0-33 23.5-56.5T160-600h80v-200q0-33 23.5-56.5T320-880h480q33 0 56.5 23.5T880-800v360q0 33-23.5 56.5T800-360h-80v200q0 33-23.5 56.5T640-80H160Zm0-80h480v-280H160v280Zm560-280h80v-280H320v120h320q33 0 56.5 23.5T720-520v80Z"/></svg></span>
+                    <span>Looking at <strong>${use(this.tabTitle)}</strong></span>
+                </div>`;
             } else {
-                return html`<span>No page content available.</span>`;
+                return html`<div>
+                    <span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"><path d="m644-428-58-58q9-47-27-88t-93-32l-58-58q17-8 34.5-12t37.5-4q75 0 127.5 52.5T660-500q0 20-4 37.5T644-428Zm128 126-58-56q38-29 67.5-63.5T832-500q-50-101-143.5-160.5T480-720q-29 0-57 4t-55 12l-62-62q41-17 84-25.5t90-8.5q151 0 269 83.5T920-500q-23 59-60.5 109.5T772-302Zm20 246L624-222q-35 11-70.5 16.5T480-200q-151 0-269-83.5T40-500q21-53 53-98.5t73-81.5L56-792l56-56 736 736-56 56ZM222-624q-29 26-53 57t-41 67q50 101 143.5 160.5T480-280q20 0 39-2.5t39-5.5l-36-38q-11 3-21 4.5t-21 1.5q-75 0-127.5-52.5T300-500q0-11 1.5-21t4.5-21l-84-82Zm319 93Zm-151 75Z"/></svg></span>
+                    <span>No page content available.</span>
+                </div>`;
             }
         })}</div>
       <form
