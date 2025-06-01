@@ -43,7 +43,7 @@ function App() {
           {
             role: "system",
             content:
-              "You are a helpful assistant designed to answer general questions. Do not use Markdown to format your responses.", // TODO: Add Markdown support
+              "You are a helpful assistant designed to answer general questions.",
           },
         ]
       } else {
@@ -207,6 +207,10 @@ function App() {
         color: var(--fill-quaternary);
       }
     }
+
+    .markdown p {
+        margin: 0;
+    }
   `;
 
   return html`
@@ -215,7 +219,7 @@ function App() {
         ${use(this.messages, (i) =>
           i.map(
             (message) => html`
-              <div class="${"message " + message.type}">${message.message}</div>
+              <div class="${"message " + message.type}">${parse(message.message)}</div>
             `,
           ),
         )}
