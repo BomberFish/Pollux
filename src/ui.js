@@ -3,31 +3,71 @@ function App() {
   this.messages = [{ type: "info", message: "Preparing model..." }];
   this.prompt = "";
   this.sendDisabled = true;
+  this.pageContent = "";
+  this.tabTitle = "";
+  this.tabUrl = "";
 
   this.mount = async () => {
     try {
+      await new Promise((resolve, reject) => {
+        chrome.runtime.sendMessage({ type: "GET_PAGE_CONTENT" }, (response) => {
+          if (chrome.runtime.lastError) {
+            // Handle errors from sendMessage, e.g., if the content script isn't ready
+            console.error("Error getting page content:", chrome.runtime.lastError.message);
+            this.pageContent = "";
+            this.tabTitle = "Error";
+            this.tabUrl = "";
+            // Optionally, you could reject the promise here if it's a critical error
+            // reject(new Error(chrome.runtime.lastError.message));
+            // For now, we'll proceed with empty content
+            resolve();
+            return;
+          }
+          this.pageContent = distill(response.content || "");
+          this.tabTitle = response.title || "";
+          this.tabUrl = response.url || "";
+          console.log("Page content:", this.pageContent);
+          console.log("Tab title:", this.tabTitle);
+          console.log("Tab URL:", this.tabUrl);
+          resolve();
+        });
+      });
+
+      let sysPrompt = [];
+      if (!this.pageContent || this.pageContent.length === 0) {
+        sysPrompt = [
+          {
+            role: "system",
+            content:
+              "You are a helpful assistant designed to answer general questions. Do not use Markdown to format your responses.", // TODO: Add Markdown support
+          },
+        ]
+      } else {
+        sysPrompt = [
+          {
+            role: "system",
+            content:
+              `You are a helpful browser assistant designed to answer questions about the current page or general knowledge. The user is looking at a website with the title ${this.tabTitle} and the URL ${this.tabUrl}. Here is an excerpt of the site's content: ${this.pageContent.slice(0, 500)}...`
+          },
+        ];
+      }
+
+
       this.lm = await LanguageModel.create({
-        monitor(m) {
+        monitor: (m) => { // Use arrow function to preserve `this` context
           m.addEventListener("downloadprogress", (e) => {
             console.log(`Downloaded ${e.loaded * 100}%`);
             if (0 < e.loaded && e.loaded < 1) {
               this.messages = [
                 ...this.messages,
-                `Downloading model: ${Math.round(e.loaded * 100)}%`,
+                { type: "info", message: `Downloading model: ${Math.round(e.loaded * 100)}%` }, // Ensure message is an object
               ];
             }
           });
         },
-        initialPrompts: [
-          {
-            role: "system",
-            content:
-              "You are a helpful assistant. Do not use Markdown to format your responses.",
-          }, // TODO: Add Markdown support
-        ],
+        initialPrompts: sysPrompt,
       });
       console.log("lm:", this.lm);
-      // this.messages = [...this.messages, "Model ready!"];
       this.messages = [
         ...this.messages,
         { type: "info", message: "Model ready!" },
@@ -89,14 +129,33 @@ function App() {
     }
 
     .messages {
-      height: calc(100vh - 5.4em);
+      height: calc(100vh - 6.4em);
       overflow-y: auto;
     }
 
     .input {
+      height: 5em;
       display: flex;
-      gap: 0.75em;
-      height: 3em;
+      flex-direction: column;
+      gap: 0.5em;
+      form {
+        display: flex;
+        gap: 0.75em;
+        height: 3em;
+        width: 100%;
+      }
+    }
+
+    .page-info {
+      color: var(--fg-secondary);
+      font-size: 0.9em;
+      span {
+        display: inline-block;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        max-width: 80%;
+      }
     }
 
     input {
@@ -157,8 +216,15 @@ function App() {
           ),
         )}
       </div>
+      <div class="input">
+        <div class="page-info">${use(this.pageContent, (content) => {
+            if (content && content.length > 0) {
+                return html`<span>Looking at <strong>${use(this.tabTitle)}</strong></span>`;
+            } else {
+                return html`<span>No page content available.</span>`;
+            }
+        })}</div>
       <form
-        class="input"
         on:submit="${async (e) => {
           e.preventDefault(); // Prevent default form submission
           this.sendDisabled = true;
@@ -218,8 +284,85 @@ function App() {
           Send
         </button>
       </form>
+      </div>
     </div>
   `;
+}
+
+// slopped-out function shat out by gemini 2.5 pro
+function distill(html) {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+
+  // 1. Remove unwanted elements globally.
+  // These elements are typically not part of the core readable content.
+  const selectorsToRemove = [
+    'script', 'style', 'link', 'meta', 'noscript', // Standard non-visible, meta, or styling elements
+    'header', // Page headers (often global, not article-specific headers)
+    'nav',    // Navigation menus
+    'footer', // Page footers
+    'aside',  // Sidebars, related content often found here
+    'iframe', 'embed', 'object', 'applet', // Embedded external content or plugins
+    'img', 'picture', 'svg', 'video', 'audio', 'map', 'area', // Media elements
+    'form', 'button', 'input', 'select', 'textarea', 'label', 'fieldset', 'legend', // Interactive form elements
+    'canvas', // Drawing canvases
+    // Common class/id patterns for non-content sections
+    '[class*="cookie"]', '[id*="cookie"]', // Cookie consent banners
+    '[class*="modal"]', '[id*="modal"]',   // Modal dialogs
+    '[class*="popup"]', '[id*="popup"]',   // Popup windows
+    '[class*="share"]', '[id*="share"]',   // Social sharing buttons
+    '[class*="social"]', '[id*="social"]', // Social media links/widgets
+    '[class*="sidebar"]', '[id*="sidebar"]',// Explicit sidebars
+    '[class*="comment"]', '[id*="comment"]', // Comment sections and forms
+    '[class*="advert"]', '[id*="advert"]', // Advertisements
+    '[class*="ad"]', '[id*="ad"]', '[class*="ads"]', // More ad selectors
+    '[class*="related"]', // Related posts/articles links
+    '[class*="promo"]', '[id*="promo"]',   // Promotional content
+    '[class*="widget"]', // Generic widgets, often in sidebars or footers
+    '[aria-hidden="true"]', // Elements explicitly hidden from assistive technologies (and often users)
+    'figure > figcaption', // Captions for figures (figures themselves often contain images, which are removed)
+    '.noprint', '[class*="noprint"]' // Elements not meant for printing (often ads or navigation)
+  ];
+  doc.querySelectorAll(selectorsToRemove.join(', ')).forEach(el => el.remove());
+
+  // 2. Attempt to find the main content element.
+  // This is a heuristic and prioritizes common semantic tags and class names for articles.
+  let mainContentElement =
+    doc.querySelector('article') ||    // HTML5 article tag
+    doc.querySelector('main') ||       // HTML5 main tag
+    doc.querySelector('[role="main"]') || // ARIA role for main content
+    // Common class names for main content wrappers
+    doc.querySelector('.entry-content') ||
+    doc.querySelector('.post-content') ||
+    doc.querySelector('.article-body') ||
+    doc.querySelector('.story-content') ||
+    doc.querySelector('div[class*="article-content"]') || // More generic article content class
+    // More generic class names, use with caution as they can be broad
+    doc.querySelector('div[class*="content"]') ||
+    doc.querySelector('div[class*="post"]') ||
+    doc.querySelector('div[class*="main"]') || // Can be too broad if not specific enough
+    // ID-based selectors, often used for main content areas
+    doc.querySelector('div[id*="content"]') ||
+    doc.querySelector('div[id*="main"]') ||
+    doc.body; // Fallback to the entire body if no specific content area is found
+
+  if (!mainContentElement) {
+    // This path should ideally not be taken if doc.body exists.
+    return "";
+  }
+
+  // 3. Extract text content from the selected main element.
+  // The `textContent` property recursively gets the content of all child nodes,
+  // ignoring HTML tags, comments, and processing instructions. It effectively "strips formatting".
+  let text = mainContentElement.textContent || "";
+
+  // 4. Normalize whitespace.
+  // Replace any sequence of one or more whitespace characters (spaces, tabs, newlines, etc.)
+  // with a single space. Then, trim leading and trailing whitespace from the result.
+  // This ensures the output is a single block of plaintext with words separated by single spaces,
+  // fulfilling the "strip all formatting" and "make it all plaintext" requirements.
+  text = text.replace(/\s+/g, ' ').trim();
+
+  return text;
 }
 
 window.addEventListener("load", () => {

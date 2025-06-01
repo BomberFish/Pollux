@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Pollux",
   "version": "1.0.0",
-  "description": "Interact with Gemini Nano in a sidebar, running locally.",
+  "description": "Use on-device AI to answer questions about the current page.",
   "minimum_chrome_version": "138",
   "icons": {
     "256": "res/gemini.png"
