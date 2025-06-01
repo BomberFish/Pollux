@@ -2,6 +2,8 @@
 
 A Chrome extension to answer questions about the current page using Gemini Nano on-device.
 
+![Demo](https://raw.githubusercontent.com/BomberFish/pollux/master/res/demo.webp)
+
 ## Requirements
 
 - Chrome 138 or higher
