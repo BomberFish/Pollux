@@ -7,30 +7,42 @@
                 margin: 0;
                 overflow: hidden;
                 color-scheme: light dark;
+                background: transparent;
             }
 
             body,html,input,button {
                 font-family: system-ui, -apple-system, BlinkSystemMacFont, Arial, Helvetica, sans-serif;
             }
 
-            @media (prefers-color-scheme: light) {
-                :root {
-                    --bg: #fafaff;
-                    --fill-primary: #f0f0f5;
-                    --fg: #060608;
-                    --fg-secondary: #424246;
+            :root {
+                --bg: #fafaff;
+                --fill-primary: #f0f0f5;
+                --fill-secondary: #e0e0e5;
+                --fill-tertiary: #d0d0d5;
+                --fill-quaternary: #c0c0c5;
+                --fill-accent: color-mix(in srgb, color-mix(in srgb, var(--fill-primary) 30%, transparent), var(--accent) 10%);
 
-                    --accent: #186bf2;
-                    --error: #d32f2f;
-                }
+                --fg: #060608;
+                --fg-secondary: #424246;
+                --fg-tertiary: #6a6a6c;
+                --fg-quaternary: #8a8a8c;
+
+                --accent: #186bf2;
+                --error: #d32f2f;
             }
 
             @media (prefers-color-scheme: dark) {
                 :root {
                     --bg: #101012;
                     --fill-primary: #1a1a1e;
+                    --fill-secondary: #2a2a2e;
+                    --fill-tertiary: #3a3a3e;
+                    --fill-quaternary: #4a4a4e;
+
                     --fg: #ffffff;
                     --fg-secondary: #8a8a8c;
+                    --fg-tertiary: #b0b0b2;
+                    --fg-quaternary: #d0d0d2;
 
                     --accent: #4285f4;
                     --error: #f44336;

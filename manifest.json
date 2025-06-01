@@ -13,5 +13,6 @@
   "background": {
       "service_worker": "src/sw.js"
   },
-  "permissions": ["sidePanel"]
+  "permissions": ["sidePanel", "scripting", "activeTab"],
+  "host_permissions": ["<all_urls>"]
 }
