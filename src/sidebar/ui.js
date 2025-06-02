@@ -136,6 +136,10 @@ function App() {
       border-bottom-left-radius: 0.5em;
     }
 
+    .message.info {
+      user-select: none;
+    }
+
     .message.info,
     .message.error {
       background-color: transparent;
@@ -190,6 +194,7 @@ function App() {
         white-space: nowrap;
         text-overflow: ellipsis;
         max-width: 80%;
+        user-select: none;
       }
     }
 

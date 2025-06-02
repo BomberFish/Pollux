@@ -4,13 +4,14 @@ body,html {
     overflow: hidden;
     color-scheme: light dark;
     background: transparent;
+    accent-color: var(--accent);
 }
 
 body,html,input,button,select,textarea {
     font-family: system-ui, -apple-system, BlinkSystemMacFont, Arial, Helvetica, sans-serif;
 }
 
-:root {
+html {
     --bg: #fafaff;
     --fill-primary: #f0f0f5;
     --fill-secondary: #e0e0e5;
@@ -29,7 +30,7 @@ body,html,input,button,select,textarea {
 }
 
 @media (prefers-color-scheme: dark) {
-    :root {
+    html {
         --bg: #101012;
         --fill-primary: #1a1a1e;
         --fill-secondary: #2a2a2e;
@@ -45,6 +46,10 @@ body,html,input,button,select,textarea {
         --error: #f44336;
         --success: #66bb6a;
     }
+}
+
+::selection {
+    background-color: color-mix(in srgb, color-mix(in srgb, var(--accent) 90%, white), transparent 60%);
 }
 
 .app {
@@ -64,6 +69,8 @@ button {
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease;
   outline: none;
+
+  user-select: none;
 
   &:hover {
     background-color: color-mix(in srgb, var(--fill-accent), white 3%);
@@ -98,6 +105,7 @@ input {
 
   ::-webkit-input-placeholder {
     color: var(--fg-quaternary);
+    user-select: none;
   }
 }
 
