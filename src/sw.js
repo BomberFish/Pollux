@@ -1,3 +1,10 @@
+chrome.runtime.onInstalled.addListener(function(details) {
+  chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
+  if (details.reason === "install") {
+    chrome.tabs.create({ url: "src/first-install/index.html" });
+  }
+});
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message && message.type === 'GET_PAGE_CONTENT') {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {

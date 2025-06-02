@@ -1,0 +1,106 @@
+body,html {
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    color-scheme: light dark;
+    background: transparent;
+}
+
+body,html,input,button,select,textarea {
+    font-family: system-ui, -apple-system, BlinkSystemMacFont, Arial, Helvetica, sans-serif;
+}
+
+:root {
+    --bg: #fafaff;
+    --fill-primary: #f0f0f5;
+    --fill-secondary: #e0e0e5;
+    --fill-tertiary: #d0d0d5;
+    --fill-quaternary: #c0c0c5;
+    --fill-accent: color-mix(in srgb, color-mix(in srgb, var(--fill-primary) 30%, transparent), var(--accent) 10%);
+
+    --fg: #060608;
+    --fg-secondary: #424246;
+    --fg-tertiary: #6a6a6c;
+    --fg-quaternary: #8a8a8c;
+
+    --accent: #186bf2;
+    --error: #d32f2f;
+    --success: #4caf50;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #101012;
+        --fill-primary: #1a1a1e;
+        --fill-secondary: #2a2a2e;
+        --fill-tertiary: #3a3a3e;
+        --fill-quaternary: #4a4a4e;
+
+        --fg: #ffffff;
+        --fg-secondary: #8a8a8c;
+        --fg-tertiary: #b0b0b2;
+        --fg-quaternary: #d0d0d2;
+
+        --accent: #4285f4;
+        --error: #f44336;
+        --success: #66bb6a;
+    }
+}
+
+.app {
+    background-color: var(--bg);
+    color: var(--fg);
+    max-width: 100%;
+    padding: 1.25em;
+    margin: 0;
+}
+
+button {
+  background-color: var(--fill-accent);
+  color: var(--accent);
+  border: none;
+  border-radius: 0.5em;
+  padding: 0.5em 1em;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  outline: none;
+
+  &:hover {
+    background-color: color-mix(in srgb, var(--fill-accent), white 3%);
+    color: color-mix(in srgb, var(--accent), white 8%);
+  }
+
+  &:active {
+    background-color: color-mix(in srgb, var(--fill-accent), white 5%);
+    color: color-mix(in srgb, var(--accent), white 10%);
+  }
+
+  &:disabled {
+    background-color: var(--fill-primary);
+    cursor: not-allowed;
+    color: var(--fill-quaternary);
+  }
+}
+
+input {
+  flex: 1;
+  appearance: none;
+  border: 1px solid var(--fill-secondary);
+  border-radius: 0.5em;
+  padding: 0.5em;
+  background: transparent;
+  transition: border-color 0.2s ease;
+
+  &:focus {
+    outline: none;
+    border-color: var(--fill-tertiary);
+  }
+
+  ::-webkit-input-placeholder {
+    color: var(--fg-quaternary);
+  }
+}
+
+.markdown p {
+    margin: 0;
+}
